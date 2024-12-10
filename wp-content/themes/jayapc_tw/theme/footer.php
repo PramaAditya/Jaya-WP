@@ -2,19 +2,19 @@
 /**
  * The template for displaying the footer
  *
- * Contains the closing of the `#content` element and all content thereafter.
- *
- * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
- *
  * @package jayapc_tw
  */
-
 ?>
 
 	</div><!-- #content -->
 
-	<?php get_template_part( 'template-parts/layout/footer', 'content' ); ?>
-
+	<footer id="colophon" class="bg-gray-100">
+		<div class="max-w-7xl mx-auto px-4 py-8">
+			<div class="text-center text-sm text-gray-600">
+				© <?php echo date('Y'); ?> <?php bloginfo('name'); ?>. All rights reserved.
+			</div>
+		</div>
+	</footer>
 </div><!-- #page -->
 
 <?php wp_footer(); ?>

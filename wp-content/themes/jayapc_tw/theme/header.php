@@ -26,6 +26,8 @@
 <div id="page">
 	<a href="#content" class="sr-only"><?php esc_html_e( 'Skip to content', 'jayapc_tw' ); ?></a>
 
-	<?php get_template_part( 'template-parts/layout/header', 'content' ); ?>
+	<header id="masthead" class="relative z-50">
+		<?php get_template_part('template-parts/header/site-navigation'); ?>
+	</header>
 
 	<div id="content">

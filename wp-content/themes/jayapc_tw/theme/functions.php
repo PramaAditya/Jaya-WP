@@ -60,7 +60,7 @@ if ( ! function_exists( 'jayapc_tw_setup' ) ) :
 		load_theme_textdomain( 'jayapc_tw', get_template_directory() . '/languages' );
 
 		// Add default posts and comments RSS feed links to head.
-		add_theme_support( 'automatic-feed-links' );
+		// add_theme_support( 'automatic-feed-links' );
 
 		/*
 		 * Let WordPress manage the document title.
@@ -81,7 +81,6 @@ if ( ! function_exists( 'jayapc_tw_setup' ) ) :
 		register_nav_menus(
 			array(
 				'menu-1' => __( 'Primary', 'jayapc_tw' ),
-				'menu-2' => __( 'Footer Menu', 'jayapc_tw' ),
 			)
 		);
 
@@ -93,8 +92,8 @@ if ( ! function_exists( 'jayapc_tw_setup' ) ) :
 			'html5',
 			array(
 				'search-form',
-				'comment-form',
-				'comment-list',
+				// 'comment-form',
+				// 'comment-list',
 				'gallery',
 				'caption',
 				'style',
@@ -103,7 +102,7 @@ if ( ! function_exists( 'jayapc_tw_setup' ) ) :
 		);
 
 		// Add theme support for selective refresh for widgets.
-		add_theme_support( 'customize-selective-refresh-widgets' );
+		// add_theme_support( 'customize-selective-refresh-widgets' );
 
 		// Add support for editor styles.
 		add_theme_support( 'editor-styles' );
@@ -122,35 +121,18 @@ endif;
 add_action( 'after_setup_theme', 'jayapc_tw_setup' );
 
 /**
- * Register widget area.
- *
- * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
- */
-function jayapc_tw_widgets_init() {
-	register_sidebar(
-		array(
-			'name'          => __( 'Footer', 'jayapc_tw' ),
-			'id'            => 'sidebar-1',
-			'description'   => __( 'Add widgets here to appear in your footer.', 'jayapc_tw' ),
-			'before_widget' => '<section id="%1$s" class="widget %2$s">',
-			'after_widget'  => '</section>',
-			'before_title'  => '<h2 class="widget-title">',
-			'after_title'   => '</h2>',
-		)
-	);
-}
-add_action( 'widgets_init', 'jayapc_tw_widgets_init' );
-
-/**
  * Enqueue scripts and styles.
  */
 function jayapc_tw_scripts() {
 	wp_enqueue_style( 'jayapc_tw-style', get_stylesheet_uri(), array(), JAYAPC_TW_VERSION );
 	wp_enqueue_script( 'jayapc_tw-script', get_template_directory_uri() . '/js/script.min.js', array(), JAYAPC_TW_VERSION, true );
 
+	// Remove this entire if block if you don't need comments
+	/*
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
+	*/
 }
 add_action( 'wp_enqueue_scripts', 'jayapc_tw_scripts' );
 
@@ -195,3 +177,45 @@ require get_template_directory() . '/inc/template-tags.php';
  * Functions which enhance the theme by hooking into WordPress.
  */
 require get_template_directory() . '/inc/template-functions.php';
+
+function register_mega_menu() {
+    register_nav_menus(array(
+        'primary' => __('Primary Mega Menu', 'jayapc_tw'),
+    ));
+}
+add_action('after_setup_theme', 'register_mega_menu');
+
+// Include the Mega Menu Walker class
+require_once get_template_directory() . '/inc/class-mega-menu-walker.php';
+
+// Disable comments completely
+function disable_comments() {
+    // Disable support for comments and trackbacks in post types
+    $post_types = get_post_types();
+    foreach ($post_types as $post_type) {
+        if (post_type_supports($post_type, 'comments')) {
+            remove_post_type_support($post_type, 'comments');
+            remove_post_type_support($post_type, 'trackbacks');
+        }
+    }
+
+    // Close comments on the front-end
+    add_filter('comments_open', '__return_false', 20, 2);
+    add_filter('pings_open', '__return_false', 20, 2);
+
+    // Hide existing comments
+    add_filter('comments_array', '__return_empty_array', 10, 2);
+
+    // Remove comments page from admin menu
+    add_action('admin_menu', function () {
+        remove_menu_page('edit-comments.php');
+    });
+
+    // Remove comments links from admin bar
+    add_action('init', function () {
+        if (is_admin_bar_showing()) {
+            remove_action('admin_bar_menu', 'wp_admin_bar_comments_menu', 60);
+        }
+    });
+}
+add_action('init', 'disable_comments');
